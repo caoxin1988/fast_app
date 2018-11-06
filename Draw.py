@@ -76,10 +76,12 @@ class Draw(object):
                     user_cnt['[1, 3]'] = s[(s >= 1) & (s < 3)].count()
                     user_cnt['[3, 6]'] = s[(s >= 3) & (s < 6)].count()
                     user_cnt['[6, 10]'] = s[(s >= 6) & (s < 10)].count()
+                elif max_len == 1 and r =='times':
+                    user_cnt['[1, 5]'] = s[(s >= 1) & (s < 5)].count()
+                    user_cnt['[5, 8]'] = s[(s >= 5) & (s < 8)].count()
+                    user_cnt['[8, 10]'] = s[(s >= 8) & (s < 10)].count()
 
-            if max_len == 1 and r == 'count':
-                break
-            else:
+            if max_len != 1:
                 user_cnt['[' + str(min) + ', ' + str(max) + ']'] = s[(s >= min) & (s <= max)].count()
 
             max_len -= 1
@@ -94,14 +96,11 @@ class Draw(object):
         if r == 'times':
             plt.title('app open times by person')
         elif r == 'count':
-            plt.title('app open counts by person')
+            plt.title('open numbers per person')
         plt.show()
 
 
-    def draw_bar(self, d : dict):
-        # d = {'user' : [100], 'app' : [20], 'average' : [5]}
-        data_frame = pd.DataFrame(d, index=['cnt'])
-        print(data_frame)
+    def draw_bar(self, s, type : str):
 
-        data_frame.plot(kind='bar')
+        s.plot(kind=type)
         plt.show()
