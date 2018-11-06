@@ -2,7 +2,15 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import tkinter
+from pandas import Series
 
-plt.plot([1,2, 3], [4, 5, 6], label='abc')
-plt.plot([4, 2, 3], [4, 5, 6], label = 'efg')
-plt.show()
+df = pd.read_csv('query_result.csv', sep = '\t', usecols=[0, 3, 13, 16], names=['stm', 'sid', 'app_name', 'mac'])
+print(df.head())
+
+df.stm = pd.to_datetime(df.stm + 28800, unit='s')
+print(df.stm)
+
+tm = pd.to_datetime(1540413749, unit='s')
+print(tm)
+tm = pd.to_datetime(1540413749 + (8 *3600), unit='s')
+print(tm)
