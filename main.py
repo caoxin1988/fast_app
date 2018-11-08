@@ -13,12 +13,23 @@ user_counts = 0
 app_open_times = 0
 app_numbers = 0
 
+def read_daily_csv_file():
+    daily_df = pd.read_csv('./daily.csv', sep = '\t', names = ['date', 'mac', 'cnt'])
+    # daily_df.dropna(how = 'any', inplace = True)
+    # daily_df.mac = daily_df.mac.apply(lambda x : ':'.join([x[:2], x[2:4], x[4:6], x[6:8], x[8:10], x[10:]]))
+    print(daily_df.head())
+    print(daily_df.shape)
+    print(daily_df.mac.describe())
+    print(daily_df.cnt.sum())
+
 def read_csv_file():
     global data_frame
 
     data_frame = pd.read_csv('./query_result.csv', sep = '\t',
                                 usecols=[0, 3, 13, 16], names=['stm', 'sid', 'app_name', 'mac'])
+    data_frame.dropna(how = 'any', inplace = True)
     data_frame.stm = pd.to_datetime(data_frame.stm + 28800, unit='s')
+    data_frame.mac = data_frame.mac.apply(lambda x : x.upper())
     # print(data_frame.head())
     # print(data_frame.shape)
 
@@ -84,17 +95,19 @@ def main():
 
     apps = data_frame.app_name.value_counts()
     app_numbers = apps.count()
-    draw.draw_app_names_pie(apps, data_frame.app_name.count())
+    # draw picture
+    # draw.draw_app_names_pie(apps, data_frame.app_name.count())
 
     get_user_and_apps_num()
 
     users = data_frame.mac.value_counts()
-    draw.draw_app_open_times_pie_by_person(users, 'times')
+    # draw picture
+    # draw.draw_app_open_times_pie_by_person(users, 'times')
 
     df = data_frame[['mac', 'app_name']].drop_duplicates()
     user_cnt = df.mac.value_counts()
     # how many apps opened per person
-    draw.draw_app_open_times_pie_by_person(user_cnt, 'count')
+    # draw.draw_app_open_times_pie_by_person(user_cnt, 'count')
 
     print(user_counts, app_numbers, app_open_times)
 
@@ -108,11 +121,12 @@ def main():
     tmp = df.app_name.value_counts()
     highlight_app = set(tmp.head(20).index.tolist())
     print(tmp.shape)
-    print(tmp.head(20))
-    draw.draw_bar(tmp.head(20), 'barh')
+    # print(tmp.head(20))
+    # draw picture
+    # draw.draw_bar(tmp.head(20), 'barh')
     
     # highlight users and highlight apps
-    for i in range(5):
+    for i in range(10):
         mac = highlight_user.pop()
         app_name = highlight_app.pop()
         print('===> ', mac, app_name)
@@ -121,5 +135,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    read_daily_csv_file()
 
