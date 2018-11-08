@@ -6,45 +6,10 @@ import datetime
 import re
 import matplotlib.pyplot as plt
 
-from Draw import Draw
 from User import User
+from Apps import Apps
 
-data_frame = None
-user_counts = 0
-app_open_times = 0
-app_numbers = 0
-
-def read_csv_file():
-    global data_frame
-
-    data_frame = pd.read_csv('./query_result.csv', sep = '\t',
-                                usecols=[0, 3, 13, 16], names=['stm', 'sid', 'app_name', 'mac'])
-    data_frame.dropna(how = 'any', inplace = True)
-    data_frame.mac = data_frame.mac.apply(lambda x : x.upper())
-    print(data_frame.shape)
-    data_frame = data_frame[data_frame.mac.str.startswith('28:76:CD') | data_frame.mac.str.startswith('8C:6D:50') | data_frame.mac.str.startswith('18:89:A0')]
-    data_frame.stm = pd.to_datetime(data_frame.stm + 28800, unit='s')
-    print(data_frame.head())
-    # print(data_frame.shape)
-
-    data_frame = data_frame[(data_frame.app_name != 'tv.fun.marketshow') & 
-                            (data_frame.app_name != 'com.funshion.poweroffidalog') &
-                            (data_frame.app_name != 'com.cvte.tv.media') &
-                            (data_frame.app_name != 'com.toptech.localmm')]
-
-    print(data_frame.shape)
-
-def get_user_and_apps_num():
-    global user_counts
-    global app_open_times
-
-    d = dict()
-    d['user_num'] = user_counts = data_frame.mac.value_counts().count()
-    d['app_start_times'] = app_open_times = data_frame.app_name.count()
-    d['average'] = d['app_start_times'] / d['user_num']
-    print('user and app num : ', d)
-
-
+'''
 def merge_stm_and_sid(df : pd.DataFrame):
     d = dict()
     for i in df.index:
@@ -58,82 +23,40 @@ def merge_stm_and_sid(df : pd.DataFrame):
             d[sid] = stm
 
     df.drop(columns = 'stm', inplace = True)
+'''
 
-def app_graph_by_name(mac : str, app_name : str):
-    print('%s users has opened %s' % (data_frame[data_frame.app_name == app_name].mac.value_counts().count(), app_name))
+def get_miss_user_number(apps : Apps, user : User):
+    # users in daily.csv but not in app_starts.csv
+    all_app_user_set = apps.get_user_mac_set()
+    all_tv_user_set = user.get_user_mac_set()
+    print('miss user numbers: ', len(all_app_user_set & all_tv_user_set))
 
-    df = data_frame[data_frame.mac == mac]
-    print(df[df.app_name == app_name].head())
-    print(df[df.app_name == app_name].shape)
-
-    sessions = data_frame[(data_frame.mac == mac)].sid.drop_duplicates().count()
-    print('user : %s has opened %s for %s times in %s different sessions' % \
-            (mac, app_name, len(df[df.app_name == app_name]), sessions))
-
-    apps = df.app_name.drop_duplicates()
-    d = dict()
-    for app in apps.values:
-        cnt = len(df[df.app_name == app])
-        d[app] = [cnt, sessions]
-        print('user : %s has opened %s for %s times in %s different sessions' % \
-                (mac, app, cnt, sessions))
-
-    pd.DataFrame(d, index = ['times', 'sessions']).T.plot(kind='bar')
-    plt.show()
-    
+# 计算打开app用户数量和所有开机用户数量关系
+def cal_apps_and_all_users():
+    pass
 
 def main():
-    global app_numbers
-    draw = Draw()
-    read_csv_file()
 
-    apps = data_frame.app_name.value_counts()
-    app_numbers = apps.count()
-    # draw picture
-    # draw.draw_app_names_pie(apps, data_frame.app_name.count())
+    apps = Apps()
+    user = User()
 
-    get_user_and_apps_num()
+    # get_miss_user_number(apps, user)
+    app_df = apps.get_dataframe()
+    app_df = app_df[['app_name', 'mac']].groupby('mac').agg({'app_name':'value_counts'}).rename(columns={'app_name':'app_cnt'})
+    app_df = app_df.reset_index().set_index('mac')
+    print(app_df.shape)
 
-    users = data_frame.mac.value_counts()
-    # draw picture
-    # draw.draw_app_open_times_pie_by_person(users, 'times')
+    user_df = user.get_user_dataframe()
 
-    df = data_frame[['mac', 'app_name']].drop_duplicates()
-    user_cnt = df.mac.value_counts()
-    # how many apps opened per person
-    # draw.draw_app_open_times_pie_by_person(user_cnt, 'count')
-
-    print(user_counts, app_numbers, app_open_times)
-
-    all_app_user_set = set(user_cnt.index.tolist())
-    u = User()
-    all_tv_user_set = u.get_user_mac_set()
-    print(len(all_app_user_set), len(all_tv_user_set))
-    print(len(all_app_user_set & all_tv_user_set))
-
-    # show the apps by the GOOD users
-
-    # df= data_frame[['mac', 'app_name']]
-    # set1 = set(user_cnt[(user_cnt >= 1) & (user_cnt < 6)].index.tolist())
-    # set2 = set(users[users >= 10].index.tolist())
-    # highlight_user = set1 & set2
-    # print(len(set1), len(set2), len(highlight_user))
-    # df = df[df.mac.isin(highlight_user)]
-    # tmp = df.app_name.value_counts()
-    # highlight_app = set(tmp.head(20).index.tolist())
-    # print(tmp.shape)
-
-    # print(tmp.head(20))
-    # draw picture
-    # draw.draw_bar(tmp.head(20), 'barh')
-    
-    # highlight users and highlight apps
-    # for i in range(10):
-    #     mac = highlight_user.pop()
-    #     app_name = highlight_app.pop()
-    #     print('===> ', mac, app_name)
-    #     app_graph_by_name(mac, app_name)
-
+    # print(user_df.shape)
+    app_df.insert(2, 'open_count', Series(user_df.cnt.values, index=user_df.mac))
+    print(app_df.head())
+    # print(app_df.shape)
+    # print(app_df.open_count.describe())
+    # app_df.dropna(how='any', inplace=True)
+    # print(app_df.shape)
+    # app_df[app_df.open_count < 1000].plot('open_count', 'app_cnt' ,kind='scatter')
+    # plt.show()
 
 
 if __name__ == '__main__':

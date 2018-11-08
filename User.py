@@ -28,11 +28,10 @@ class User(object):
         plt.title('user start tv ratio')
         plt.show()
 
-    def calculate_app_start_ratio(self, s : Series):
-        pass
+    def get_user_dataframe(self):
+        return self.data_frame
 
     def get_user_mac_set(self):
         return set(self.data_frame.mac.values.tolist())
 
-# user = User()
         
