@@ -7,20 +7,12 @@ import re
 import matplotlib.pyplot as plt
 
 from Draw import Draw
+from User import User
 
 data_frame = None
 user_counts = 0
 app_open_times = 0
 app_numbers = 0
-
-def read_daily_csv_file():
-    daily_df = pd.read_csv('./daily.csv', sep = '\t', names = ['date', 'mac', 'cnt'])
-    # daily_df.dropna(how = 'any', inplace = True)
-    # daily_df.mac = daily_df.mac.apply(lambda x : ':'.join([x[:2], x[2:4], x[4:6], x[6:8], x[8:10], x[10:]]))
-    print(daily_df.head())
-    print(daily_df.shape)
-    print(daily_df.mac.describe())
-    print(daily_df.cnt.sum())
 
 def read_csv_file():
     global data_frame
@@ -28,9 +20,11 @@ def read_csv_file():
     data_frame = pd.read_csv('./query_result.csv', sep = '\t',
                                 usecols=[0, 3, 13, 16], names=['stm', 'sid', 'app_name', 'mac'])
     data_frame.dropna(how = 'any', inplace = True)
-    data_frame.stm = pd.to_datetime(data_frame.stm + 28800, unit='s')
     data_frame.mac = data_frame.mac.apply(lambda x : x.upper())
-    # print(data_frame.head())
+    print(data_frame.shape)
+    data_frame = data_frame[data_frame.mac.str.startswith('28:76:CD') | data_frame.mac.str.startswith('8C:6D:50') | data_frame.mac.str.startswith('18:89:A0')]
+    data_frame.stm = pd.to_datetime(data_frame.stm + 28800, unit='s')
+    print(data_frame.head())
     # print(data_frame.shape)
 
     data_frame = data_frame[(data_frame.app_name != 'tv.fun.marketshow') & 
@@ -111,30 +105,37 @@ def main():
 
     print(user_counts, app_numbers, app_open_times)
 
+    all_app_user_set = set(user_cnt.index.tolist())
+    u = User()
+    all_tv_user_set = u.get_user_mac_set()
+    print(len(all_app_user_set), len(all_tv_user_set))
+    print(len(all_app_user_set & all_tv_user_set))
+
     # show the apps by the GOOD users
-    df= data_frame[['mac', 'app_name']]
-    set1 = set(user_cnt[(user_cnt >= 1) & (user_cnt < 6)].index.tolist())
-    set2 = set(users[users >= 10].index.tolist())
-    highlight_user = set1 & set2
-    print(len(set1), len(set2), len(highlight_user))
-    df = df[df.mac.isin(highlight_user)]
-    tmp = df.app_name.value_counts()
-    highlight_app = set(tmp.head(20).index.tolist())
-    print(tmp.shape)
+
+    # df= data_frame[['mac', 'app_name']]
+    # set1 = set(user_cnt[(user_cnt >= 1) & (user_cnt < 6)].index.tolist())
+    # set2 = set(users[users >= 10].index.tolist())
+    # highlight_user = set1 & set2
+    # print(len(set1), len(set2), len(highlight_user))
+    # df = df[df.mac.isin(highlight_user)]
+    # tmp = df.app_name.value_counts()
+    # highlight_app = set(tmp.head(20).index.tolist())
+    # print(tmp.shape)
+
     # print(tmp.head(20))
     # draw picture
     # draw.draw_bar(tmp.head(20), 'barh')
     
     # highlight users and highlight apps
-    for i in range(10):
-        mac = highlight_user.pop()
-        app_name = highlight_app.pop()
-        print('===> ', mac, app_name)
-        app_graph_by_name(mac, app_name)
+    # for i in range(10):
+    #     mac = highlight_user.pop()
+    #     app_name = highlight_app.pop()
+    #     print('===> ', mac, app_name)
+    #     app_graph_by_name(mac, app_name)
 
 
 
 if __name__ == '__main__':
-    # main()
-    read_daily_csv_file()
+    main()
 
