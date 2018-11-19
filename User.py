@@ -4,25 +4,29 @@ import matplotlib.pyplot as plt
 
 class User(object):
 
-    def __init__(self):
-        df = pd.read_csv('./daily.csv', sep = '\t' , usecols = [1, 2],
-                                        names = ['mac', 'cnt'])
+    def __init__(self, file_name : str):
+        print('====== read : ', file_name, 'start ======')
+        df = pd.read_csv(file_name, sep = '\t' , usecols = [1, 2],
+                                        names = ['mac', 'open_cnt'])
         df.dropna(how = 'any', inplace = True)
 
         df = df[df.mac.str.startswith('2876CD') | df.mac.str.startswith('8C6D50') | df.mac.str.startswith('1889A0')]
-        df = df.groupby('mac').cnt.sum().reset_index()
+        df = df.groupby('mac').open_cnt.sum().reset_index()
         df.mac = df.mac.apply(lambda x : ':'.join([x[:2], x[2:4], x[4:6], x[6:8], x[8:10], x[10:]]))
         print(df.head())
-        print(df.mac.describe())
+        print('user numbers : ', df.count())
+        print('start tv times : ', df.open_cnt.sum())
         self.data_frame = df
+        print('====== read : ', file_name, ' end ======')
+        print('\n')
 
     def user_open_times(self):
-        print(self.data_frame.cnt.describe())
+        print(self.data_frame.open_cnt.describe())
         d = dict()
-        d['[1000 : ]'] = self.data_frame.cnt[self.data_frame.cnt >= 1000].count()
-        d['[500 : 1000]'] = self.data_frame.cnt[(self.data_frame.cnt >= 500) & (self.data_frame.cnt < 1000)].count()
-        d['[100 : 500]'] = self.data_frame.cnt[(self.data_frame.cnt >= 100) & (self.data_frame.cnt < 500)].count()
-        d['[ : 100]'] = self.data_frame.cnt[self.data_frame.cnt < 100].count()
+        d['[1000 : ]'] = self.data_frame.open_cnt[self.data_frame.open_cnt >= 1000].count()
+        d['[500 : 1000]'] = self.data_frame.open_cnt[(self.data_frame.open_cnt >= 500) & (self.data_frame.open_cnt < 1000)].count()
+        d['[100 : 500]'] = self.data_frame.open_cnt[(self.data_frame.open_cnt >= 100) & (self.data_frame.open_cnt < 500)].count()
+        d['[ : 100]'] = self.data_frame.open_cnt[self.data_frame.open_cnt < 100].count()
         print(d)
         Series(d, name= '').plot(kind='pie', autopct = '%.2f')
         plt.title('user start tv ratio')
@@ -34,4 +38,11 @@ class User(object):
     def get_user_mac_set(self):
         return set(self.data_frame.mac.values.tolist())
 
-        
+if __name__ == '__main__':
+    user = User('./csv_files/20181117-start.csv')
+    df = user.data_frame[user.data_frame.open_cnt > 50].sort_values(by = 'open_cnt').set_index('mac')
+    print(df.head())
+    with open('mac.txt', 'w') as f:
+        for mac in df.index.tolist():
+            string = mac + ' : ' + str(df.loc[mac, 'open_cnt']) + '\n'
+            f.write(string)

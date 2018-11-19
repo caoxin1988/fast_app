@@ -5,24 +5,22 @@ from pandas import Series
 from Draw import Draw
 
 class Apps(object):
-    def __init__(self):
-        data_frame = pd.read_csv('./query_result.csv', sep = '\t',
+    def __init__(self, file_name : str):
+        print('====== read : ', file_name, 'start ======')
+        data_frame = pd.read_csv(file_name, sep = '\t',
                                 usecols=[0, 3, 13, 16], names=['stm', 'sid', 'app_name', 'mac'])
         data_frame.dropna(how = 'any', inplace = True)
         data_frame.mac = data_frame.mac.apply(lambda x : x.upper())
         # print(data_frame.shape)
         data_frame = data_frame[data_frame.mac.str.startswith('28:76:CD') | data_frame.mac.str.startswith('8C:6D:50') | data_frame.mac.str.startswith('18:89:A0')]
         data_frame.stm = pd.to_datetime(data_frame.stm + 28800, unit='s')
-        # print(data_frame.head())
-        # print(data_frame.shape)
 
         data_frame = data_frame[(data_frame.app_name != 'tv.fun.marketshow') & 
-                                (data_frame.app_name != 'com.funshion.poweroffidalog') &
+                                (data_frame.app_name != 'com.funshion.poweroffdialog') &
                                 (data_frame.app_name != 'com.cvte.tv.media') &
                                 (data_frame.app_name != 'com.toptech.localmm')]
 
-        print(data_frame.shape)
-
+        # print(data_frame.shape)
         self.draw = Draw()
         self.data_frame = data_frame
 
@@ -34,6 +32,8 @@ class Apps(object):
 
         self.app_numbers = data_frame.app_name.drop_duplicates().count()
         print('app numbers : ', self.app_numbers)
+        print('====== read : ', file_name, 'end ======')
+        print('\n')
 
     def get_user_mac_set(self):
         return set(self.data_frame.mac.drop_duplicates().values.tolist())
