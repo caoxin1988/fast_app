@@ -24,14 +24,14 @@ class Apps(object):
         self.draw = Draw()
         self.data_frame = data_frame
 
-        d = dict()
-        d['user_num'] = self.user_counts = data_frame.mac.value_counts().count()
-        d['app_start_times'] = self.app_open_times = data_frame.app_name.count()
-        d['average'] = d['app_start_times'] / d['user_num']
-        print('user and app num : ', d)
+        # d = dict()
+        # d['user_num'] = self.user_counts = data_frame.mac.value_counts().count()
+        # d['app_start_times'] = self.app_open_times = data_frame.app_name.count()
+        # d['average'] = d['app_start_times'] / d['user_num']
+        # print('user and app num : ', d)
 
         self.app_numbers = data_frame.app_name.drop_duplicates().count()
-        print('app numbers : ', self.app_numbers)
+        # print('app numbers : ', self.app_numbers)
         print('====== read : ', file_name, 'end ======')
         print('\n')
 

@@ -87,7 +87,6 @@ def main(date : datetime.date, write_mongo : bool, mongo_server : str):
         algo_lru.init_mongodb(mongo_server)
 
     for (date_p, date_t) in from_date(date):
-        print(date_p, date_t)
         algo_lru.calculate_target_name_with_LRU(date_p.strftime('%Y%m%d'), date_t.strftime('%Y%m%d'),
                 write_mongo= write_mongo)
 
@@ -100,7 +99,7 @@ if __name__ == '__main__':
     http_download.download_gz()
 
     '''
-    usage: 
+    usage:
       python fast_app.py --write_mongo=True --mongo_server=localhost --date_start=20181119
     '''
 

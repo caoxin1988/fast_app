@@ -15,6 +15,8 @@ def download_gz():
     if os.path.exists('csv_files/' + get_app_start_file_name()):
         return
 
+    print('#### start downloading: ', get_app_start_file_name())
+
     file_url = 'http://qv.tv.funshion.com/millet/datapost/rom/data/' + get_download_app_file_name() + '?sign=' + getSign()
     r = requests.get(file_url, stream=True)
 

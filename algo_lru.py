@@ -55,7 +55,6 @@ def calculate_target_name_with_LRU(date_p : str, date_t : str, write_mongo : boo
 
     app_df = common.remove_duplicates_of_app(apps)
     app_df = app_df[['mac', 'app_name']]
-    print('1', app_df.shape)
 
     # merge the data from former day
 #     date_f = datetime.date(int(date_p[:4]), int(date_p[4:6]), int(date_p[6:])) - datetime.timedelta(days = 1)
@@ -93,6 +92,7 @@ def calculate_target_name_with_LRU(date_p : str, date_t : str, write_mongo : boo
     print(app_start_info_dict)
 
     if write_mongo:
+        print('#### start writing app_start_info_dict into mongoDB')
         mongodb.insert_element_to_collection('apps_info', app_start_info_dict)
 
     # get the target result
@@ -108,6 +108,7 @@ def calculate_target_name_with_LRU(date_p : str, date_t : str, write_mongo : boo
     print(result_dict)
 
     if write_mongo:
+        print('#### start writing result_dict into mongoDB')
         mongodb.insert_element_to_collection('predict_ratio', result_dict)
 
 if __name__ == '__main__':
