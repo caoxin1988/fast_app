@@ -4,11 +4,13 @@ import pandas as pd
 from pandas import Series
 import datetime
 import os
+import csv
 
 import common
 from MySQL import MySQL
 from Mongodb import Mongodb
 from Apps import Apps
+from AppResult import AppResult
 
 day_num = 0
 mysql = None
@@ -38,9 +40,36 @@ def delete_all_data(collec : str):
 def close_mongodb():
     mongodb.close()
 
+def write_result_file(df : pd.DataFrame, date : str, update_result : bool):
+    result_file = common.RESULT_DIR + date + common.RESULT_CSV_SUFFIX
+
+    if not update_result:
+        return
+
+    start = datetime.datetime.now()
+
+    result = []
+    for mac_addr in df.index.levels[0]:
+        df_sub = df.loc[mac_addr]
+        if len(df_sub) > 2:
+            df_sub = df_sub.sort_values(by = 'app_cnt', ascending = False)[:2]
+
+        for app_name in df_sub.index:
+            res_sub = []
+            res_sub.append(mac_addr)
+            res_sub.append(app_name)
+
+            result.append(res_sub)
+
+    with open(result_file, 'w', newline = '') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(result)
+
+    print('#### Runtime = ', datetime.datetime.now() - start)
+
 '''algothrims for  '''
 def calculate_target_name_with_LRU(date_p : str, date_t : str, write_mongo : bool = False,
-                    write_mysql : bool = False):
+    update_result : bool = True):
 
     app_file_p = common.CSV_DIR + date_p + common.APP_CSV_SUFFIX
     app_file_t = common.CSV_DIR + date_t + common.APP_CSV_SUFFIX
@@ -50,11 +79,22 @@ def calculate_target_name_with_LRU(date_p : str, date_t : str, write_mongo : boo
         print('%s does not exist, please check, exit', file_name)
         return
 
-    # data from former day
-    apps = Apps(app_file_p)
+    result_file = common.RESULT_DIR + date_p + common.RESULT_CSV_SUFFIX
+    app_df = None
+    if os.path.exists(result_file):
+        apps = AppResult(result_file)
+        app_df = apps.get_dataframe()
+    else:
+        # data from former day
+        apps = Apps(app_file_p)
 
-    app_df = common.remove_duplicates_of_app(apps)
-    app_df = app_df[['mac', 'app_name']]
+        app_df = apps.get_dataframe()
+        app_df = app_df[['mac', 'app_name']].groupby('mac').agg({'app_name':'value_counts'}).rename(columns={'app_name':'app_cnt'})
+        # generate result for prediction
+        write_result_file(app_df, date_p, update_result)
+
+        apps = AppResult(result_file)
+        app_df = apps.get_dataframe()
 
     # merge the data from former day
 #     date_f = datetime.date(int(date_p[:4]), int(date_p[4:6]), int(date_p[6:])) - datetime.timedelta(days = 1)
@@ -73,6 +113,9 @@ def calculate_target_name_with_LRU(date_p : str, date_t : str, write_mongo : boo
     apps = Apps(app_file_t)
     app_df1 = apps.get_dataframe()
     app_df1 = app_df1[['mac', 'app_name']].groupby('mac').agg({'app_name':'value_counts'}).rename(columns={'app_name':'app_cnt'})
+    # generate result for prediction
+    write_result_file(app_df1, date_t, update_result)
+
     app_df1 = app_df1.reset_index()
 
     # merge two dataframe for the result
@@ -112,8 +155,8 @@ def calculate_target_name_with_LRU(date_p : str, date_t : str, write_mongo : boo
         mongodb.insert_element_to_collection('predict_ratio', result_dict)
 
 if __name__ == '__main__':
-    init_mongodb()
-    calculate_target_name_with_LRU('20181119', '20181120')
+    init_mongodb('localhost')
+    calculate_target_name_with_LRU('20181117', '20181118')
     # app_start_info_dict = {'date': '20181118 Sun', 'app_start_times': 434575, 'user_count_apps': 127219, 'app_counts': 1999}
     # mongodb.insert_element_to_collection('apps_info', app_start_info_dict)
     close_mongodb()

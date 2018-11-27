@@ -81,18 +81,24 @@ def from_date(date : datetime.date, days : int = 0):
 
         date_from = date_from + datetime.timedelta(days=1)
 
-def main(date : datetime.date, write_mongo : bool, mongo_server : str):
+def main(date : datetime.date, write_mongo : bool, mongo_server : str,
+        update_result : bool):
 
     if write_mongo:
         algo_lru.init_mongodb(mongo_server)
 
     for (date_p, date_t) in from_date(date):
         algo_lru.calculate_target_name_with_LRU(date_p.strftime('%Y%m%d'), date_t.strftime('%Y%m%d'),
-                write_mongo= write_mongo)
+                write_mongo= write_mongo, update_result = update_result)
 
     if write_mongo:
         algo_lru.close_mongodb()
 
+def str2bool(s : str):
+    if s.lower() == 'true':
+        return True
+    else:
+        return False
 
 if __name__ == '__main__':
     ## download csv files from http_server
@@ -100,17 +106,22 @@ if __name__ == '__main__':
 
     '''
     usage:
-      python fast_app.py --write_mongo=True --mongo_server=localhost --date_start=20181119
+      python fast_app.py --date_start=20181119 --write_mongo=True 
+        --mongo_server=172.17.7.26 --update_result=False
     '''
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--write_mongo', type = bool, default = False)
+    parser.add_argument('--write_mongo', type = str, default = False)
     parser.add_argument('--date_start', type = str, default = None)
     parser.add_argument('--mongo_server', type = str, default = 'localhost')
+    parser.add_argument('--update_result', type = str, default = True)
     args = parser.parse_args()
 
-    write_mongo = args.write_mongo
+    print(args.write_mongo)
+    print(args.update_result)
+    write_mongo = str2bool(args.write_mongo)
     mongo_server = args.mongo_server
+    update_result = str2bool(args.update_result)
 
     if args.date_start:
         date_int = int(args.date_start)
@@ -118,4 +129,5 @@ if __name__ == '__main__':
     else:
         date = datetime.date.today()
 
-    main(date, write_mongo = write_mongo, mongo_server = mongo_server)
+    main(date, write_mongo = write_mongo, mongo_server = mongo_server,
+        update_result = update_result)

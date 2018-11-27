@@ -18,6 +18,7 @@ class Apps(object):
         data_frame = data_frame[(data_frame.app_name != 'tv.fun.marketshow') & 
                                 (data_frame.app_name != 'com.funshion.poweroffdialog') &
                                 (data_frame.app_name != 'com.cvte.tv.media') &
+                                (data_frame.app_name != 'com.funshion.tvwifidisplay') &
                                 (data_frame.app_name != 'com.toptech.localmm')]
 
         # print(data_frame.shape)
