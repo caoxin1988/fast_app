@@ -82,7 +82,7 @@ def from_date(date : datetime.date, days : int = 0):
         date_from = date_from + datetime.timedelta(days=1)
 
 def main(date : datetime.date, write_mongo : bool, mongo_server : str,
-        update_result : bool):
+        update_result : bool, write_mysql : bool):
 
     if write_mongo:
         algo_lru.init_mongodb(mongo_server)
@@ -93,6 +93,11 @@ def main(date : datetime.date, write_mongo : bool, mongo_server : str,
 
     if write_mongo:
         algo_lru.close_mongodb()
+
+    # update mysql database
+    if write_mysql:
+        date = (datetime.datetime.today() - datetime.timedelta(days = 1)).strftime('%Y%m%d')
+        algo_lru.update_mysql(date)
 
 def str2bool(s : str):
     if s.lower() == 'true':
@@ -111,17 +116,20 @@ if __name__ == '__main__':
     '''
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--write_mongo', type = str, default = False)
+    parser.add_argument('--write_mongo', type = str, default = 'False')
     parser.add_argument('--date_start', type = str, default = None)
     parser.add_argument('--mongo_server', type = str, default = 'localhost')
-    parser.add_argument('--update_result', type = str, default = True)
+    parser.add_argument('--update_result', type = str, default = 'True')
+
+    parser.add_argument('--write_mysql', type = str, default = 'False')
+    parser.add_argument('--mysql_server', type = str, default = '172.17.7.26')
     args = parser.parse_args()
 
-    print(args.write_mongo)
-    print(args.update_result)
     write_mongo = str2bool(args.write_mongo)
     mongo_server = args.mongo_server
     update_result = str2bool(args.update_result)
+
+    write_mysql = str2bool(args.write_mysql)
 
     if args.date_start:
         date_int = int(args.date_start)
@@ -130,4 +138,4 @@ if __name__ == '__main__':
         date = datetime.date.today()
 
     main(date, write_mongo = write_mongo, mongo_server = mongo_server,
-        update_result = update_result)
+        update_result = update_result, write_mysql = write_mysql)

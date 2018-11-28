@@ -5,6 +5,7 @@ from pandas import Series
 import datetime
 import os
 import csv
+import json
 
 import common
 from MySQL import MySQL
@@ -13,21 +14,11 @@ from Apps import Apps
 from AppResult import AppResult
 
 day_num = 0
-mysql = None
 mongodb = None
 
 def set_days(num : int):
     global day_num
     day_num = num
-
-'''operations for mysql'''
-def init_mysql():
-    global mysql
-    mysql = MySQL(host = common.SQL_SERVER, user = 'rom', pwd = '123456', db = common.SQL_DB)
-
-def close_mysql():
-    global mysql
-    mysql.close()
 
 '''operations for mongodb'''
 def init_mongodb(server : str):
@@ -154,9 +145,56 @@ def calculate_target_name_with_LRU(date_p : str, date_t : str, write_mongo : boo
         print('#### start writing result_dict into mongoDB')
         mongodb.insert_element_to_collection('predict_ratio', result_dict)
 
+def get_package_json(names : list):
+    l = []
+    for name in names:
+        d = {'package_name' : name}
+        # d = {'package_name' : name, 'start_time' : ''}
+        l.append(d)
+
+    res = {'packagelist' : l}
+    return res
+
+def update_mysql(date : str):
+    start = datetime.datetime.now()
+    print('#### write date into mysql')
+
+    result_file = common.RESULT_DIR + date + common.RESULT_CSV_SUFFIX
+    if not os.path.exists(result_file):
+        print('%s doesnot exist', result_file)
+        return
+
+    apps = AppResult(result_file)
+    app_df = apps.get_dataframe().set_index('mac')
+    i = 0
+
+    db_list = []
+    for mac in app_df.index.drop_duplicates():
+        i += 1
+
+        l = []
+        df = app_df.loc[mac]
+        if len(df) == 1:
+            l.append(df.app_name)
+        else:
+            l = df.app_name.tolist()
+        
+        res = get_package_json(l)
+        db_list.append((mac, json.dumps(res)))
+
+        print(i)
+
+    print('#### get data time: ', datetime.datetime.now() - start)
+    mysql = MySQL(host = common.SQL_SERVER, user = 'rom', pwd = '123456', db = common.SQL_DB)
+    mysql.clear_fast_app()
+    mysql.update_target_app(db_list = db_list)
+    mysql.close()
+
+    print('#### update sql time: ', datetime.datetime.now() - start)
+
+
 if __name__ == '__main__':
-    init_mongodb('localhost')
-    calculate_target_name_with_LRU('20181117', '20181118')
-    # app_start_info_dict = {'date': '20181118 Sun', 'app_start_times': 434575, 'user_count_apps': 127219, 'app_counts': 1999}
-    # mongodb.insert_element_to_collection('apps_info', app_start_info_dict)
-    close_mongodb()
+    # init_mongodb('localhost')
+    # calculate_target_name_with_LRU('20181117', '20181118')
+    # close_mongodb()
+    update_mysql('20181127')
