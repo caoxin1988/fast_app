@@ -13,6 +13,7 @@ ZIP_FILE = 'out.zip'
 def download_gz(date : str):
     #file_url = "http://qv.tv.funshion.com/millet/datapost/rom/data/start20181108.gz?sign=268188b1325cb6f1210f32f6b581e52a"
     local_file = 'csv_files/' + get_app_start_file_name(date)
+
     if os.path.exists(local_file) and os.path.getsize(local_file) != 0:
         return
 
@@ -89,3 +90,7 @@ def extractZipFile():
 
 if __name__ == '__main__':
     pass
+else:
+    if not os.path.exists('csv_files/'):
+        print('#### mkdir csv_files')
+        os.mkdir('csv_files')

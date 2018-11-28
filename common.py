@@ -1,4 +1,5 @@
 # common function for algothrims
+import os
 
 from Apps import Apps
 
@@ -22,3 +23,10 @@ def remove_duplicates_of_app(apps: Apps):
     app_df = app_df.reset_index()
 
     return app_df
+
+if __name__ == '__main__':
+    pass
+else:
+    if not os.path.exists('result'):
+        print('#### mkdir result')
+        os.mkdir('result')
