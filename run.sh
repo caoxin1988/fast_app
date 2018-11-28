@@ -1,3 +1,5 @@
+cd /home/jsj423/fast_app
+
 git pull
 
 cur_date="log""`date +%Y%m%d-%H%M`"
