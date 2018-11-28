@@ -8,10 +8,9 @@ class MySQL(object):
         self.db.close()
 
     def clear_fast_app(self):
-        cur = self.db.cursor(cursor = pymysql.cursors.DictCursor)
+        cur = self.db.cursor()
 
-        cur.execute('delete from fast_app')
-        self.db.commit()
+        cur.execute('truncate fast_app')
         cur.close()
 
     def search_fast_app(self, mac : str):
@@ -42,7 +41,7 @@ class MySQL(object):
             print('return')
             return
 
-        cur = self.db.cursor(cursor = pymysql.cursors.DictCursor)
+        cur = self.db.cursor()
         if db_list:
             cur.executemany('insert into fast_app(mac, content) VALUES(%s, %s);', db_list)
         
@@ -60,8 +59,8 @@ if __name__ == '__main__':
     # mysql.update_target_app('abc', 'xyz')
 
     # mysql.clear_fast_app()
-    # mysql.update_target_app(db_list = [('abc', 'xyz')])
-    mysql.clear_fast_app()
+    mysql.update_target_app(db_list = [('abc', 'xyz')])
+    # mysql.clear_fast_app()
 
     mysql.close()
 

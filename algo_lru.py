@@ -166,11 +166,9 @@ def update_mysql(date : str):
 
     apps = AppResult(result_file)
     app_df = apps.get_dataframe().set_index('mac')
-    i = 0
 
     db_list = []
     for mac in app_df.index.drop_duplicates():
-        i += 1
 
         l = []
         df = app_df.loc[mac]
@@ -182,8 +180,6 @@ def update_mysql(date : str):
         res = get_package_json(l)
         db_list.append((mac, json.dumps(res)))
 
-        print(i)
-
     print('#### get data time: ', datetime.datetime.now() - start)
     mysql = MySQL(host = common.SQL_SERVER, user = 'rom', pwd = '123456', db = common.SQL_DB)
     mysql.clear_fast_app()
@@ -194,7 +190,6 @@ def update_mysql(date : str):
 
 
 if __name__ == '__main__':
-    # init_mongodb('localhost')
-    # calculate_target_name_with_LRU('20181117', '20181118')
-    # close_mongodb()
-    update_mysql('20181127')
+    init_mongodb('localhost')
+    calculate_target_name_with_LRU('20181117', '20181118')
+    close_mongodb()

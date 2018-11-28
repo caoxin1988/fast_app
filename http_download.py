@@ -10,14 +10,15 @@ sign = 'ecd3fed47446c971'
 GZ_FILE = 'out.gz'
 ZIP_FILE = 'out.zip'
 
-def download_gz():
+def download_gz(date : str):
     #file_url = "http://qv.tv.funshion.com/millet/datapost/rom/data/start20181108.gz?sign=268188b1325cb6f1210f32f6b581e52a"
-    if os.path.exists('csv_files/' + get_app_start_file_name()):
+    local_file = 'csv_files/' + get_app_start_file_name(date)
+    if os.path.exists(local_file) and os.path.getsize(local_file) != 0:
         return
 
-    print('#### start downloading: ', get_app_start_file_name())
+    print('#### start downloading: ', get_app_start_file_name(date))
 
-    file_url = 'http://qv.tv.funshion.com/millet/datapost/rom/data/' + get_download_app_file_name() + '?sign=' + getSign()
+    file_url = 'http://qv.tv.funshion.com/millet/datapost/rom/data/' + get_download_app_file_name(date) + '?sign=' + getSign(date)
     r = requests.get(file_url, stream=True)
 
     with open(GZ_FILE, 'wb') as out:
@@ -25,29 +26,29 @@ def download_gz():
             if chunk:
                 out.write(chunk)
 
-    extract_gz_file()
+    extract_gz_file(date)
 
-def get_app_start_file_name():
-    today = time.strftime('%Y%m%d', time.localtime())
-    yesterday = int(today) -1
-    return str(yesterday) + '-app.csv'
+def get_app_start_file_name(date : str):
+    # today = time.strftime('%Y%m%d', time.localtime())
+    # yesterday = int(today) -1
+    return date + '-app.csv'
 
-def get_download_app_file_name():
-    today = time.strftime('%Y%m%d', time.localtime())
-    yesterday = int(today) -1
-    fileName = 'start' + str(yesterday) + '.gz'
+def get_download_app_file_name(date : str):
+    # today = time.strftime('%Y%m%d', time.localtime())
+    # yesterday = int(today) -1
+    fileName = 'start' + date + '.gz'
     return fileName
 
-def getSign():
-    source = get_download_app_file_name() + sign
+def getSign(date : str):
+    source = get_download_app_file_name(date) + sign
     md5 = hashlib.md5(source.encode(encoding='UTF-8')).hexdigest()
     return md5
 
-def extract_gz_file():
+def extract_gz_file(date : str):
 
     g_file = gzip.GzipFile(GZ_FILE)
 
-    open('csv_files/' + get_app_start_file_name(), 'wb+').write(g_file.read())
+    open('csv_files/' + get_app_start_file_name(date), 'wb+').write(g_file.read())
     g_file.close()
 
     if os.path.exists(GZ_FILE):
@@ -87,4 +88,4 @@ def extractZipFile():
         os.remove(ZIP_FILE)
 
 if __name__ == '__main__':
-    download_gz()
+    pass

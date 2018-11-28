@@ -88,6 +88,10 @@ def main(date : datetime.date, write_mongo : bool, mongo_server : str,
         algo_lru.init_mongodb(mongo_server)
 
     for (date_p, date_t) in from_date(date):
+        ## download csv files from http_server
+        http_download.download_gz(date_p.strftime('%Y%m%d'))
+        http_download.download_gz(date_t.strftime('%Y%m%d'))
+
         algo_lru.calculate_target_name_with_LRU(date_p.strftime('%Y%m%d'), date_t.strftime('%Y%m%d'),
                 write_mongo= write_mongo, update_result = update_result)
 
@@ -106,8 +110,6 @@ def str2bool(s : str):
         return False
 
 if __name__ == '__main__':
-    ## download csv files from http_server
-    http_download.download_gz()
 
     '''
     usage:
@@ -122,7 +124,6 @@ if __name__ == '__main__':
     parser.add_argument('--update_result', type = str, default = 'True')
 
     parser.add_argument('--write_mysql', type = str, default = 'False')
-    parser.add_argument('--mysql_server', type = str, default = '172.17.7.26')
     args = parser.parse_args()
 
     write_mongo = str2bool(args.write_mongo)
