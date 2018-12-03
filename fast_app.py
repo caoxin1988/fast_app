@@ -39,38 +39,6 @@ def merge_apps_and_users(apps: Apps, user : User):
 
     return app_user_df
 
-def get_package_json(names : Series):
-    l = []
-    for name in names:
-        d = {'package_name' : name}
-        # d = {'package_name' : name, 'start_time' : ''}
-        l.append(d)
-
-    res = {'packagelist' : l}
-    return res
-
-def update_target_app_database(mysql):
-    date = datetime.date.today() - datetime.timedelta(days = 2)
-    app_file = common.CSV_DIR + date.strftime('%Y%m%d') + common.APP_CSV_SUFFIX
-
-    apps = Apps(app_file)
-    app_df = apps.get_dataframe()
-    app_df = app_df[['mac', 'app_name']].groupby('mac').agg({'app_name':'value_counts'}).rename(columns={'app_name':'app_cnt'})
-    app_df = app_df.reset_index()
-
-    i = 0
-    for mac_addr in app_df.mac.tolist():
-        df = app_df[app_df.mac == mac_addr].nlargest(2, 'app_cnt')
-
-        res = get_package_json(df.app_name)
-        i += 1
-        print(i)
-        # print(res)
-        # print(json.dumps(res))
-
-#     mysql.update_target_app('28:76:CD:01:02:B1', json.dumps(res))
-#     mysql.update_target_app('28:76:CD:00:00:53', json.dumps(res))
-
 # date : the date run this script
 def from_date(date : datetime.date, days : int = 0):
     date_from = date - datetime.timedelta(days = 2)
@@ -82,18 +50,15 @@ def from_date(date : datetime.date, days : int = 0):
         date_from = date_from + datetime.timedelta(days=1)
 
 def main(date : datetime.date, write_mongo : bool, mongo_server : str,
-        update_result : bool, write_mysql : bool):
+        update_result : bool, write_mysql : bool, day_num : int):
 
     if write_mongo:
         algo_lru.init_mongodb(mongo_server)
 
     for (date_p, date_t) in from_date(date):
-        ## download csv files from http_server
-        http_download.download_gz(date_p.strftime('%Y%m%d'))
-        http_download.download_gz(date_t.strftime('%Y%m%d'))
 
-        algo_lru.calculate_target_name_with_LRU(date_p.strftime('%Y%m%d'), date_t.strftime('%Y%m%d'),
-                write_mongo= write_mongo, update_result = update_result)
+        algo_lru.calculate_target_name_with_LRU_with_days(date_p.strftime('%Y%m%d'), date_t.strftime('%Y%m%d'),
+                write_mongo= write_mongo, update_result = update_result, day_num = day_num)
 
     if write_mongo:
         algo_lru.close_mongodb()
@@ -122,13 +87,14 @@ if __name__ == '__main__':
     parser.add_argument('--date_start', type = str, default = None)
     parser.add_argument('--mongo_server', type = str, default = 'localhost')
     parser.add_argument('--update_result', type = str, default = 'True')
-
     parser.add_argument('--write_mysql', type = str, default = 'False')
+    parser.add_argument('--days', type = int, default = 0)
     args = parser.parse_args()
 
     write_mongo = str2bool(args.write_mongo)
     mongo_server = args.mongo_server
     update_result = str2bool(args.update_result)
+    day_num = args.days
 
     write_mysql = str2bool(args.write_mysql)
 
@@ -139,4 +105,4 @@ if __name__ == '__main__':
         date = datetime.date.today()
 
     main(date, write_mongo = write_mongo, mongo_server = mongo_server,
-        update_result = update_result, write_mysql = write_mysql)
+        update_result = update_result, write_mysql = write_mysql, day_num = day_num)

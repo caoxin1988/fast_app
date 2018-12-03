@@ -89,7 +89,7 @@ def extractZipFile():
         os.remove(ZIP_FILE)
 
 if __name__ == '__main__':
-    pass
+    download_gz('20181125')
 else:
     if not os.path.exists('csv_files/'):
         print('#### mkdir csv_files')

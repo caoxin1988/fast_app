@@ -3,9 +3,14 @@ import matplotlib.pyplot as plt
 from pandas import Series
 
 from Draw import Draw
+import common
+import http_download
 
 class Apps(object):
-    def __init__(self, file_name : str):
+    def __init__(self, date : str):
+        file_name = common.CSV_DIR + date + common.APP_CSV_SUFFIX
+        http_download.download_gz(date)
+
         print('====== read : ', file_name, 'start ======')
         data_frame = pd.read_csv(file_name, sep = '\t',
                                 usecols=[0, 3, 13, 16], names=['stm', 'sid', 'app_name', 'mac'])
