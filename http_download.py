@@ -1,6 +1,7 @@
 import hashlib
 import os
 import requests
+import datetime
 import time
 import zipfile
 import gzip
@@ -89,7 +90,9 @@ def extractZipFile():
         os.remove(ZIP_FILE)
 
 if __name__ == '__main__':
-    download_gz('20181125')
+    date = datetime.datetime.now() - datetime.timedelta(days=1)
+    download_gz(date.strftime('%Y%m%d'))
+
 else:
     if not os.path.exists('csv_files/'):
         print('#### mkdir csv_files')
