@@ -253,8 +253,6 @@ def generate_target_file(date : str):
 
         for line in f.readlines():
             tmp_f.write(line)
-            print(f_name)
-            print(os.path.getsize(f_name))
             if os.path.getsize(f_name) > common.TARGET_FILE_MAX_SIZE:
                 num += 1
                 f_name = common.TARGET_RESULT_SPLIT_FILE + str(num) + common.TARGET_RESULT_FILE_SUFFIX
