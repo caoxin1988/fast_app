@@ -5,6 +5,9 @@ import datetime
 import time
 import zipfile
 import gzip
+import shutil
+
+import common
 
 sign = 'ecd3fed47446c971'
 
@@ -18,15 +21,20 @@ def download_gz(date : str):
     if os.path.exists(local_file) and os.path.getsize(local_file) != 0:
         return
 
-    print('#### start downloading: ', get_app_start_file_name(date))
+    source_file = common.HIVE_DIR + get_download_app_file_name(date)
+    if os.path.exists(source_file):
+        print('#### copy : ', source_file)
+        shutil.copy(source_file, GZ_FILE)
+    else:
+        print('#### start downloading: ', get_app_start_file_name(date))
 
-    file_url = 'http://qv.tv.funshion.com/millet/datapost/rom/data/' + get_download_app_file_name(date) + '?sign=' + getSign(date)
-    r = requests.get(file_url, stream=True)
+        file_url = 'http://qv.tv.funshion.com/millet/datapost/rom/data/' + get_download_app_file_name(date) + '?sign=' + getSign(date)
+        r = requests.get(file_url, stream=True)
 
-    with open(GZ_FILE, 'wb') as out:
-        for chunk in r.iter_content(chunk_size=1024):
-            if chunk:
-                out.write(chunk)
+        with open(GZ_FILE, 'wb') as out:
+            for chunk in r.iter_content(chunk_size=1024):
+                if chunk:
+                    out.write(chunk)
 
     extract_gz_file(date)
 

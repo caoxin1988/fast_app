@@ -50,7 +50,7 @@ def from_date(date : datetime.date, days : int = 0):
         date_from = date_from + datetime.timedelta(days=1)
 
 def main(date : datetime.date, write_mongo : bool, mongo_server : str,
-        update_result : bool, write_mysql : bool, day_num : int):
+        update_result : bool, write_mysql : bool, generate_file : bool, day_num : int):
 
     if write_mongo:
         algo_lru.init_mongodb(mongo_server)
@@ -63,10 +63,13 @@ def main(date : datetime.date, write_mongo : bool, mongo_server : str,
     if write_mongo:
         algo_lru.close_mongodb()
 
+    date = (datetime.datetime.today() - datetime.timedelta(days = 1)).strftime('%Y%m%d')
     # update mysql database
     if write_mysql:
-        date = (datetime.datetime.today() - datetime.timedelta(days = 1)).strftime('%Y%m%d')
         algo_lru.update_mysql(date)
+
+    if generate_file:
+        algo_lru.generate_target_file(date)
 
 def str2bool(s : str):
     if s.lower() == 'true':
@@ -88,12 +91,14 @@ if __name__ == '__main__':
     parser.add_argument('--mongo_server', type = str, default = 'localhost')
     parser.add_argument('--update_result', type = str, default = 'True')
     parser.add_argument('--write_mysql', type = str, default = 'False')
+    parser.add_argument('--generate_file', type = str, default = 'False')
     parser.add_argument('--days', type = int, default = 0)
     args = parser.parse_args()
 
     write_mongo = str2bool(args.write_mongo)
     mongo_server = args.mongo_server
     update_result = str2bool(args.update_result)
+    generate_file = str2bool(args.generate_file)
     day_num = args.days
 
     write_mysql = str2bool(args.write_mysql)
@@ -105,4 +110,5 @@ if __name__ == '__main__':
         date = datetime.date.today()
 
     main(date, write_mongo = write_mongo, mongo_server = mongo_server,
-        update_result = update_result, write_mysql = write_mysql, day_num = day_num)
+        update_result = update_result, write_mysql = write_mysql, generate_file = generate_file,
+        day_num = day_num)

@@ -9,6 +9,19 @@ RESULT_DIR = './result/'
 RESULT_CSV_SUFFIX = '-result.csv'
 TARGET_NUM = 2
 
+TARGET_RESULT_DIR = '/data/fast_app/'
+TARGET_RESULT_SPLIT_DIR = '/data/fast_app/split/'
+TARGET_RESULT_FILE = '/data/fast_app/target_result'
+TARGET_RESULT_SPLIT_FILE = '/data/fast_app/split/target_result-'
+TARGET_RESULT_FILE_SUFFIX = '.txt'
+
+TARGET_FILE_MAX_SIZE = 1000 * 1024
+POST_URL = 'http://172.17.5.73:8080/api/v1/rom-data'
+GET_URL = 'http://172.17.5.73:8080/api/v1/clear/rom-data'
+AUTH_SUFFIX = 'file-setting-log-upload'
+
+HIVE_DIR = '/data/hive_run_data/'
+
 SQL_SERVER = '172.17.7.26'
 SQL_DB = 'rom_charts'
 

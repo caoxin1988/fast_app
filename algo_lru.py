@@ -6,6 +6,9 @@ import datetime
 import os
 import csv
 import json
+import requests
+import hashlib
+import time
 
 import common
 from MySQL import MySQL
@@ -181,8 +184,88 @@ def update_mysql(date : str):
 
     print('#### update sql time: ', datetime.datetime.now() - start)
 
+def upload_result_to_server():
+    parameters = {}
+    parameters['ctime'] = str(int(time.time()))
+    source = parameters['ctime'] + common.AUTH_SUFFIX
+    parameters['sign'] = hashlib.md5(source.encode(encoding='UTF-8')).hexdigest()
+    ret = requests.get(url=common.GET_URL, params = parameters)
+    print('get : ', ret)
+
+    headers = {}
+    for root, dirs, files in os.walk(common.TARGET_RESULT_SPLIT_DIR):
+        for file in files:
+            file_name = common.TARGET_RESULT_SPLIT_DIR + file
+            files = dict()
+            files['file'] = open(file_name, 'rb')
+
+            headers['fn'] = file_name
+            source = file_name + common.AUTH_SUFFIX
+            headers['auth'] = hashlib.md5(source.encode(encoding='UTF-8')).hexdigest()
+            ret = requests.post(url=common.POST_URL, headers = headers, files = files)
+            print(ret)
+
+def generate_target_file(date : str):
+    start = datetime.datetime.now()
+    print('#### write date into file')
+
+    result_file = common.RESULT_DIR + date + common.RESULT_CSV_SUFFIX
+    if not os.path.exists(result_file):
+        print('%s doesnot exist', result_file)
+        return
+
+    apps = AppResult(result_file)
+    app_df = apps.get_dataframe().set_index('mac')
+
+    db_list = []
+    for mac in app_df.index.drop_duplicates():
+
+        l = []
+        df = app_df.loc[mac]
+        if len(df) == 1:
+            l.append(df.app_name)
+        else:
+            l = df.app_name.tolist()
+
+        res = get_package_json(l)
+        db_list.append([mac, json.dumps(res)])
+
+    print('#### get data time: ', datetime.datetime.now() - start)
+
+    if not os.path.exists(common.TARGET_RESULT_DIR):
+        os.mkdir(common.TARGET_RESULT_DIR)
+        os.mkdir(common.TARGET_RESULT_SPLIT_DIR)
+    else:
+        for root, dirs, files in os.walk(common.TARGET_RESULT_SPLIT_DIR):
+            for file in files:
+                os.remove(common.TARGET_RESULT_SPLIT_DIR + file)
+
+    target_file = common.TARGET_RESULT_FILE + common.TARGET_RESULT_FILE_SUFFIX
+    with open(target_file, 'w', newline = '') as f:
+        for line in db_list:
+            f.write(line[0] + ',')
+            f.write(line[1] + '\n')
+
+    with open(target_file, 'r') as f:
+        num = 0
+        f_name = common.TARGET_RESULT_SPLIT_FILE + str(num) + common.TARGET_RESULT_FILE_SUFFIX
+        tmp_f = open(f_name, 'w')
+
+        for line in f.readlines():
+            tmp_f.write(line)
+            print(f_name)
+            print(os.path.getsize(f_name))
+            if os.path.getsize(f_name) > common.TARGET_FILE_MAX_SIZE:
+                num += 1
+                f_name = common.TARGET_RESULT_SPLIT_FILE + str(num) + common.TARGET_RESULT_FILE_SUFFIX
+                tmp_f = open(f_name, 'w')
+
+    print('#### generate file time: ', datetime.datetime.now() - start)
+
 
 if __name__ == '__main__':
     init_mongodb('localhost')
-    calculate_target_name_with_LRU_with_days('20181126', '20181127', update_result=True, day_num =1)
+    # calculate_target_name_with_LRU_with_days('20181126', '20181127', update_result=True, day_num =1)
+    # generate_target_file('20181212')
+    upload_result_to_server()
     close_mongodb()
