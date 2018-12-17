@@ -42,6 +42,19 @@ def merge_dataframe_with_days(df : pd.DataFrame, date : str, day_num : int = 0):
 
         app_df = app_df.reset_index().groupby(['mac', 'app_name']).agg({'app_cnt':'sum'})
 
+    isoweekday = datetime.date(int(date[:4]), int(date[4:6]), int(date[6:])).isoweekday()
+    if day_num < 6 and isoweekday >= 4 and isoweekday <= 6:
+        print(' #### tomorrow isnot workday, merge data a week ago also')
+
+        date_f = datetime.date(int(date[:4]), int(date[4:6]), int(date[6:])) - datetime.timedelta(days = 6)
+        apps = Apps(date_f.strftime('%Y%m%d'))
+        app_df_f = apps.get_dataframe()
+        app_df_f = app_df_f[['mac', 'app_name']].groupby('mac').agg({'app_name':'value_counts'}).rename(columns={'app_name':'app_cnt'})
+
+        app_df = pd.concat([app_df, app_df_f])
+
+        app_df = app_df.reset_index().groupby(['mac', 'app_name']).agg({'app_cnt':'sum'})
+
     return app_df
 
 def write_result_file_with_days(df : pd.DataFrame, date : str, update_result : bool, days : int = 0):
@@ -263,7 +276,5 @@ def generate_target_file(date : str):
 
 if __name__ == '__main__':
     init_mongodb('localhost')
-    # calculate_target_name_with_LRU_with_days('20181126', '20181127', update_result=True, day_num =1)
-    # generate_target_file('20181212')
-    upload_result_to_server()
+    calculate_target_name_with_LRU_with_days('20181213', '20181214', update_result=True, day_num =3)
     close_mongodb()
