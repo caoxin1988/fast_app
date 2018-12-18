@@ -273,6 +273,8 @@ def generate_target_file(date : str):
 
     print('#### generate file time: ', datetime.datetime.now() - start)
 
+    upload_result_to_server()
+
 
 if __name__ == '__main__':
     init_mongodb('localhost')

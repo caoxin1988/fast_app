@@ -16,8 +16,10 @@ TARGET_RESULT_SPLIT_FILE = '/data/fast_app/split/target_result-'
 TARGET_RESULT_FILE_SUFFIX = '.txt'
 
 TARGET_FILE_MAX_SIZE = 1000 * 1024
-POST_URL = 'http://172.17.5.73:8080/api/v1/rom-data'
-GET_URL = 'http://172.17.5.73:8080/api/v1/clear/rom-data'
+# POST_URL = 'http://172.17.5.73:8080/api/v1/rom-data'
+POST_URL = 'http://172.17.12.130:8580/master-admin/api/v1/rom-data'
+# GET_URL = 'http://172.17.5.73:8080/api/v1/clear/rom-data'
+GET_URL = 'http://172.17.12.130:8580/master-admin/api/v1/clear/rom-data'
 AUTH_SUFFIX = 'file-setting-log-upload'
 
 HIVE_DIR = '/data/hive_run_data/'

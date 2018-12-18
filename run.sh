@@ -21,4 +21,4 @@ fi
 
 cd ..
 
-/opt/anaconda3/bin/python fast_app.py --write_mongo=True --write_mysql=True --generate_file=True --days=3 >"log/"$file_name
+/opt/anaconda3/bin/python fast_app.py --write_mongo=True --write_mysql=True --generate_file=True --days=5 >"log/"$file_name
