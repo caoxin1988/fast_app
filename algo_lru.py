@@ -261,15 +261,18 @@ def generate_target_file(date : str):
 
     with open(target_file, 'r') as f:
         num = 0
-        f_name = common.TARGET_RESULT_SPLIT_FILE + str(num) + common.TARGET_RESULT_FILE_SUFFIX
+        f_name = common.TARGET_RESULT_SPLIT_FILE + str(num).zfill(3) + common.TARGET_RESULT_FILE_SUFFIX
         tmp_f = open(f_name, 'w')
 
         for line in f.readlines():
             tmp_f.write(line)
             if os.path.getsize(f_name) > common.TARGET_FILE_MAX_SIZE:
                 num += 1
-                f_name = common.TARGET_RESULT_SPLIT_FILE + str(num) + common.TARGET_RESULT_FILE_SUFFIX
+                f_name = common.TARGET_RESULT_SPLIT_FILE + str(num).zfill(3) + common.TARGET_RESULT_FILE_SUFFIX
+                tmp_f.close()
                 tmp_f = open(f_name, 'w')
+
+        tmp_f.close()
 
     print('#### generate file time: ', datetime.datetime.now() - start)
 
