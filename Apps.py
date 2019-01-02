@@ -4,12 +4,12 @@ from pandas import Series
 
 from Draw import Draw
 import common
-import http_download
+from http_download import DownloadGZ
 
 class Apps(object):
     def __init__(self, date : str):
         file_name = common.CSV_DIR + date + common.APP_CSV_SUFFIX
-        http_download.download_gz(date)
+        DownloadGZ.download_gz(date)
 
         print('====== read : ', file_name, 'start ======')
         data_frame = pd.read_csv(file_name, sep = '\t',
@@ -109,3 +109,7 @@ class Apps(object):
         #     app_name = highlight_app.pop()
         #     print('===> ', mac, app_name)
         #     app_graph_by_name(mac, app_name)
+
+
+if __name__ == '__main__':
+    app = Apps('20190101')

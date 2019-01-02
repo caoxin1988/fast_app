@@ -1,10 +1,15 @@
 import pandas as pd
 from pandas import Series
 import matplotlib.pyplot as plt
+from http_download import DownlaodZip
+import common
 
 class User(object):
 
-    def __init__(self, file_name : str):
+    def __init__(self, date : str):
+        file_name = common.CSV_DIR + date + common.USER_CSV_SUFFIX
+        DownlaodZip.download_zip(date)
+
         print('====== read : ', file_name, 'start ======')
         df = pd.read_csv(file_name, sep = '\t' , usecols = [1, 2],
                                         names = ['mac', 'open_cnt'])
@@ -14,7 +19,7 @@ class User(object):
         df = df.groupby('mac').open_cnt.sum().reset_index()
         df.mac = df.mac.apply(lambda x : ':'.join([x[:2], x[2:4], x[4:6], x[6:8], x[8:10], x[10:]]))
         print(df.head())
-        print('user numbers : ', df.count())
+        print('user numbers : ', df.mac.count())
         print('start tv times : ', df.open_cnt.sum())
         self.data_frame = df
         print('====== read : ', file_name, ' end ======')
@@ -39,10 +44,4 @@ class User(object):
         return set(self.data_frame.mac.values.tolist())
 
 if __name__ == '__main__':
-    user = User('./csv_files/20181117-start.csv')
-    df = user.data_frame[user.data_frame.open_cnt > 50].sort_values(by = 'open_cnt').set_index('mac')
-    print(df.head())
-    with open('mac.txt', 'w') as f:
-        for mac in df.index.tolist():
-            string = mac + ' : ' + str(df.loc[mac, 'open_cnt']) + '\n'
-            f.write(string)
+    user = User('20190101')

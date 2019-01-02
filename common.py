@@ -3,7 +3,7 @@ import os
 
 CSV_DIR = './csv_files/'
 APP_CSV_SUFFIX = '-app.csv'
-USER_CSV_SUFFIX = '-start.csv'
+USER_CSV_SUFFIX = '-user.csv'
 
 RESULT_DIR = './result/'
 RESULT_CSV_SUFFIX = '-result.csv'
