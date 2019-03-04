@@ -42,7 +42,7 @@ class Apps(object):
         print('\n')
 
     def get_user_mac_set(self):
-        return set(self.data_frame.mac.drop_duplicates().values.tolist())
+        return set(self.data_frame.mac.drop_duplicates().values)
 
     def get_dataframe(self):
         return self.data_frame

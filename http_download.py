@@ -117,8 +117,8 @@ class DownlaodZip:
 
 if __name__ == '__main__':
     date = datetime.datetime.now() - datetime.timedelta(days=1)
-    # DownloadGZ.download_gz(date.strftime('%Y%m%d'))
-    DownlaodZip.download_zip('20190101')
+    DownloadGZ.download_gz(date.strftime('20190103'))
+    # DownlaodZip.download_zip(date.strftime('%Y%m%d'))
 
 else:
     if not os.path.exists('csv_files/'):

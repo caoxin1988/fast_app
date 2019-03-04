@@ -41,7 +41,7 @@ class User(object):
         return self.data_frame
 
     def get_user_mac_set(self):
-        return set(self.data_frame.mac.values.tolist())
+        return set(self.data_frame.mac.values)
 
 if __name__ == '__main__':
     user = User('20190101')

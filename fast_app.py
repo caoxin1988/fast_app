@@ -18,7 +18,6 @@ def get_miss_user_number(apps : Apps, user : User):
     all_app_user_set = apps.get_user_mac_set()
     all_tv_user_set = user.get_user_mac_set()
     print('miss user numbers: ', len(all_app_user_set & all_tv_user_set))
-'''
 
 def merge_apps_and_users(apps: Apps, user : User):
     app_df = common.remove_duplicates_of_app(apps)
@@ -38,6 +37,7 @@ def merge_apps_and_users(apps: Apps, user : User):
     print(app_user_df.head())
 
     return app_user_df
+'''
 
 # date : the date run this script
 def from_date(date : datetime.date, days : int = 0):
